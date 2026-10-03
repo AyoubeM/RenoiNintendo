@@ -10,6 +10,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
+from services.cron_server import CronWebServer
 from utils.json_manager import ensure_data_files, load_games
 
 # 1. Chargement de l'environnement
@@ -40,6 +41,7 @@ class CheckPriceBot(commands.Bot):
             intents=intents,
             help_command=None
         )
+        self.cron_server = CronWebServer(self)
 
     async def setup_hook(self):
         """Chargement des extensions et synchronisation des slash commands."""
@@ -77,6 +79,21 @@ class CheckPriceBot(commands.Bot):
         else:
             synced = await self.tree.sync()
             logger.info(f"Slash commands synchronisées globalement ({len(synced)} commandes).")
+
+        # Démarrage du serveur web pour requêtes Cron externes
+        enable_web = os.getenv("ENABLE_CRON_SERVER", "true").lower() in ("true", "1", "yes")
+        if enable_web:
+            port = int(os.getenv("PORT", 8080))
+            try:
+                await self.cron_server.start(port=port)
+            except Exception as e:
+                logger.warning(f"Impossible de démarrer le serveur web sur le port {port}: {e}")
+
+    async def close(self):
+        """Arrêt propre du bot et du serveur web."""
+        if hasattr(self, "cron_server") and self.cron_server:
+            await self.cron_server.stop()
+        await super().close()
 
     async def on_ready(self):
         """Événement déclenché lorsque le bot est connecté et prêt."""

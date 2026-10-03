@@ -155,6 +155,35 @@ Dans le **Discord Developer Portal** :
 
 ---
 
+## 🌐 Déclenchement Externe via Cron / Webhook
+
+Le bot supporte deux méthodes de déclenchement externe pour mettre à jour tous les prix de la liste :
+
+### 1. Par requête HTTP (Webhook pour cron-job.org, EasyCron, etc.)
+Lorsque le bot est lancé (`python main.py`), il démarre automatiquement un serveur web léger :
+- **Endpoint** : `GET` ou `POST` sur `http://votre-ip-ou-domaine:8080/api/cron`
+- **Sécurité (optionnelle)** : Ajoutez `CRON_SECRET=mon_token` dans votre `.env`. La requête doit inclure l'en-tête `Authorization: Bearer mon_token` ou le paramètre `?secret=mon_token`.
+- **Réponse** :
+  ```json
+  {
+    "status": "success",
+    "message": "Analyse effectuée avec succès.",
+    "total_games": 2,
+    "promotions_detected": 1,
+    "price_hikes": 0,
+    "unchanged": 1
+  }
+  ```
+
+### 2. Par script autonome (`cron_check.py`)
+Si vous préférez exécuter un cron système (crontab Linux, GitHub Actions, etc.) sans maintenir le bot connecté en continu :
+```bash
+python cron_check.py
+```
+Ce script vérifie tous les jeux, met à jour les fichiers JSON locaux, et envoie directement les alertes et le rapport dans le salon Discord via l'API REST Discord.
+
+---
+
 ## 🔄 Analyse Quotidienne et Détection de Promotion
 
 ### Règle de détection de promotion :
