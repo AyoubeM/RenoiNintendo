@@ -132,5 +132,40 @@ def main():
         logger.error(f"Une erreur est survenue lors de l'exécution du bot : {e}", exc_info=True)
 
 
+# ==============================================================================
+# Point d'entrée pour le déploiement Serverless (Vercel)
+# ==============================================================================
+import json
+from http.server import BaseHTTPRequestHandler
+
+
+class VercelHandler(BaseHTTPRequestHandler):
+    """Handler pour exécuter l'actualisation des prix lors d'un appel Vercel/Cron."""
+
+    def do_GET(self):
+        try:
+            from cron_check import run_cron_analysis
+            result = asyncio.run(run_cron_analysis())
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(json.dumps(result, ensure_ascii=False).encode("utf-8"))
+        except Exception as e:
+            self.send_response(500)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "error", "error": str(e)}).encode("utf-8"))
+
+    def do_POST(self):
+        self.do_GET()
+
+
+# Exports de premier niveau attendus par Vercel CLI
+handler = VercelHandler
+app = VercelHandler
+application = VercelHandler
+
+
 if __name__ == "__main__":
     main()
+

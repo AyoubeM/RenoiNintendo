@@ -45,24 +45,26 @@ async def send_discord_rest_message(session: aiohttp.ClientSession, channel_id: 
             logger.info("Message envoyé avec succès sur Discord.")
 
 
-async def main():
+async def run_cron_analysis() -> dict:
+    """Exécute l'analyse complète de tous les jeux et publie les messages sur Discord."""
     ensure_data_files()
     games = load_games()
     if not games:
         logger.info("Aucun jeu surveillé trouvé dans data/games.json.")
-        return
+        return {"status": "ok", "message": "Aucun jeu surveillé", "total_games": 0}
 
     token = os.getenv("DISCORD_TOKEN")
     channel_id = os.getenv("DISCORD_CHANNEL_ID")
 
     if not token or not channel_id:
-        logger.error("DISCORD_TOKEN ou DISCORD_CHANNEL_ID manquant dans le .env.")
-        return
+        msg = "DISCORD_TOKEN ou DISCORD_CHANNEL_ID manquant dans les variables d'environnement."
+        logger.error(msg)
+        return {"status": "error", "message": msg}
 
     logger.info(f"Lancement de l'actualisation Cron pour {len(games)} jeu(x)...")
     checker = PriceCheckerService()
 
-    # Exécuter l'analyse complète (sans passer de bot gateway)
+    # Exécuter l'analyse complète
     results = await checker.check_all_games(
         bot=None,
         target_channel=None,
@@ -86,6 +88,17 @@ async def main():
         await send_discord_rest_message(session, channel_id, token, report_embed.to_dict())
 
     logger.info("Actualisation Cron terminée avec succès.")
+    return {
+        "status": "success",
+        "total_games": results.get("total_games", 0),
+        "promotions_detected": len(results.get("promotions", [])),
+        "price_hikes": len(results.get("hikes", [])),
+        "unchanged": len(results.get("unchanged", []))
+    }
+
+
+async def main():
+    await run_cron_analysis()
 
 
 if __name__ == "__main__":
