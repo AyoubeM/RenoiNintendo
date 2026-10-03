@@ -1,0 +1,28 @@
+{
+  "games": [
+    {
+      "id": "113837",
+      "name": "Uncharted: The Nathan Drake Collection",
+      "url": "https://psprices.com/region-fr/game/113837/unchartedtm-the-nathan-drake-collection",
+      "current_price": 19.99,
+      "previous_price": 19.99,
+      "lowest_price": 5.99,
+      "currency": "EUR",
+      "discount": 67,
+      "last_checked": "2026-10-03T16:25:42",
+      "image": "https://image.api.playstation.com/vulcan/img/rnd/202011/1101/zC3kulm2Ho3ZE38ZUYHW7WMK.png"
+    },
+    {
+      "id": "4977353",
+      "name": "UNCHARTED: Legacy of Thieves Collection",
+      "url": "https://psprices.com/region-fr/game/4977353/uncharted-legacy-of-thieves-collection",
+      "current_price": 49.99,
+      "previous_price": 49.99,
+      "lowest_price": 19.99,
+      "currency": "EUR",
+      "discount": 0,
+      "last_checked": "2026-10-03T16:30:14",
+      "image": "https://image.api.playstation.com/vulcan/ap/rnd/202111/2000/gTUWTlvPHzxFJ2JAxtDyI2eS.png"
+    }
+  ]
+}
